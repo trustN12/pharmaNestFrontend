@@ -49,21 +49,47 @@ function Login() {
         }
       );
 
+      console.log(response.data);
+
       if (response.data.statusCode === 200) {
+
         toast.success("Login Successful ✅");
 
+        // Save Login Data
         localStorage.setItem("isLogin", true);
 
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user)
+        );
+
+        // Redirect Based On User Type
         setTimeout(() => {
-          navigate("/dashboard");
+
+          if (response.data.user.type === "Admin") {
+
+            navigate("/admin-dashboard");
+
+          } else {
+
+            navigate("/user-dashboard");
+
+          }
+
         }, 2000);
+
       } else {
+
         toast.error(response.data.statusMessage);
+
       }
+
     } catch (error) {
+
       console.log(error);
 
       toast.error("Login Failed ❌");
+
     }
   };
 

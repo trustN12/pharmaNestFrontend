@@ -2,13 +2,20 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { Eye, EyeOff, LockKeyhole, ShieldCheck, HeartPulse, User, Mail } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  ShieldCheck,
+  HeartPulse,
+  User,
+  Mail,
+} from "lucide-react";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { motion } from "framer-motion";
-
 
 function Register() {
   const navigate = useNavigate();
@@ -58,6 +65,11 @@ function Register() {
         email: "",
         password: "",
       });
+
+      // Redirect to Login
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error) {
       console.log(error);
 
