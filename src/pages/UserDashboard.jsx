@@ -1,156 +1,323 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-
-import { motion } from "framer-motion";
 import {
   User,
   Wallet,
   ShieldCheck,
   Activity,
-  Pill,
-  ShoppingCart,
-  ClipboardList,
   HeartPulse,
   LogOut,
+  Mail,
+  Calendar,
+  Edit3,
+  Save,
   Sparkles,
+  Eye,
+  EyeOff,
+  TrendingUp,
+  BadgeCheck,
   Bell,
-  ArrowUpRight,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function UserDashboard() {
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // ================= STATES =================
 
-  const logoutUser = () => {
-    localStorage.removeItem("isLogin");
+  const [user, setUser] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [editData, setEditData] = useState({
+    id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+
+  // ================= GET USER =================
+
+  useEffect(() => {
+    const localUser = JSON.parse(localStorage.getItem("user"));
+
+    if (!localUser) {
+      navigate("/login");
+
+      return;
+    }
+
+    fetchUser(localUser.id);
+  }, []);
+
+  // ================= FETCH USER =================
+
+  const fetchUser = async (id) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5281/api/Users/ViewUser",
+        {
+          ID: id,
+        }
+      );
+
+      if (response.data.statusCode === 200) {
+        setUser(response.data.user);
+
+        setEditData({
+          id: response.data.user.id,
+          firstName: response.data.user.firstName,
+          lastName: response.data.user.lastName,
+          email: response.data.user.email,
+          password: response.data.user.password,
+        });
+      } else {
+        toast.error("User not found");
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Failed to load user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= HANDLE CHANGE =================
+
+  const handleChange = (e) => {
+    setEditData({
+      ...editData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ================= UPDATE PROFILE =================
+
+  const updateProfile = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5281/api/Users/UpdateProfile",
+        {
+          ID: editData.id,
+          FirstName: editData.firstName,
+          LastName: editData.lastName,
+          Email: editData.email,
+          Password: editData.password,
+        }
+      );
+
+      if (response.data.statusCode === 200) {
+        toast.success("Profile Updated Successfully ✅");
+
+        const updatedUser = {
+          ...user,
+          firstName: editData.firstName,
+          lastName: editData.lastName,
+          email: editData.email,
+          password: editData.password,
+        };
+
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        setUser(updatedUser);
+
+        setIsEditing(false);
+      } else {
+        toast.error(response.data.statusMessage);
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Update failed");
+    }
+  };
+
+  // ================= LOGOUT =================
+
+  const logout = () => {
     localStorage.removeItem("user");
+
+    localStorage.removeItem("isLogin");
 
     navigate("/login");
   };
 
-  return (
-    <div className="min-h-screen bg-[#030712] overflow-hidden relative text-white">
-      {/* ================= DREAMY BACKGROUND ================= */}
+  // ================= LOADING =================
 
-      {/* Main Glow */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-[-250px] left-[-150px] w-[700px] h-[700px] bg-cyan-500/20 blur-[180px] rounded-full animate-pulse" />
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center overflow-hidden relative">
+        <div className="absolute top-[-100px] left-[-100px] w-[350px] h-[350px] bg-cyan-500/20 blur-[120px] rounded-full"></div>
 
-        <div className="absolute bottom-[-250px] right-[-150px] w-[700px] h-[700px] bg-blue-600/20 blur-[180px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-100px] right-[-100px] w-[350px] h-[350px] bg-blue-500/20 blur-[120px] rounded-full"></div>
 
-        <div className="absolute top-[35%] left-[35%] w-[300px] h-[300px] bg-pink-500/10 blur-[120px] rounded-full" />
-      </div>
-
-      {/* Neon Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:70px_70px]" />
-
-      {/* Floating Particles */}
-      {[...Array(20)].map((_, i) => (
         <motion.div
-          key={i}
-          initial={{
-            y: 1000,
-            opacity: 0,
-          }}
           animate={{
-            y: -100,
-            opacity: [0, 1, 0],
-            x: [0, 40, -40, 0],
+            rotate: 360,
           }}
           transition={{
             repeat: Infinity,
-            duration: 10 + i,
-            delay: i * 0.4,
+            duration: 2,
+            ease: "linear",
+          }}
+          className="w-24 h-24 rounded-full border-4 border-cyan-400 border-t-transparent"
+        />
+
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.5,
+            repeatType: "reverse",
+          }}
+          className="text-white text-4xl font-black mt-10"
+        >
+          Loading Dashboard...
+        </motion.h1>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-white overflow-hidden relative">
+      {/* Toast */}
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+
+      {/* Background Glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-120px] left-[-100px] w-[450px] h-[450px] bg-cyan-500/20 blur-[150px] rounded-full"></div>
+
+        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] bg-blue-600/20 blur-[150px] rounded-full"></div>
+      </div>
+
+      {/* Grid */}
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:70px_70px]"></div>
+
+      {/* Floating Particles */}
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            y: [0, -40, 0],
+            opacity: [0.2, 1, 0.2],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 4 + i,
+            repeat: Infinity,
           }}
           className="absolute"
           style={{
+            top: `${Math.random() * 100}%`,
             left: `${Math.random() * 100}%`,
           }}
         >
-          <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_20px_#22d3ee]" />
+          <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_20px_#22d3ee]"></div>
         </motion.div>
       ))}
 
-      {/* Giant Dreamy Heart */}
-      <motion.div
-        animate={{
-          scale: [1, 1.08, 1],
-          opacity: [0.03, 0.08, 0.03],
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 2,
-        }}
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <div className="text-[450px] text-pink-500 blur-sm">❤</div>
-      </motion.div>
-
-      {/* ================= CONTENT ================= */}
-
-      <div className="relative z-10 p-6 md:p-10">
-        {/* ================= TOP BAR ================= */}
-
-        <motion.div
-          initial={{ opacity: 0, y: -60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-10"
-        >
+      {/* MAIN */}
+      <div className="relative z-10 px-6 md:px-12 py-10 max-w-7xl mx-auto">
+        {/* TOP BAR */}
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-14">
           <div>
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-cyan-400/20 bg-white/5 backdrop-blur-xl mb-5">
-              <Sparkles className="text-cyan-300" size={18} />
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-3 bg-white/5 border border-cyan-400/20 px-6 py-3 rounded-full backdrop-blur-2xl mb-6 shadow-[0_0_30px_rgba(34,211,238,0.15)]"
+            >
+              <Sparkles className="text-cyan-400" size={18} />
 
-              <span className="text-cyan-200 text-sm tracking-wider">
-                FUTURISTIC HEALTHCARE DASHBOARD
+              <p className="text-cyan-300 text-sm font-bold tracking-[3px] uppercase">
+                Future Healthcare System
+              </p>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1 }}
+              className="text-5xl md:text-7xl font-black leading-tight"
+            >
+              Welcome Back,
+              <span className="block bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 bg-clip-text text-transparent">
+                {user.firstName}
               </span>
-            </div>
+            </motion.h1>
 
-            <h1 className="text-5xl md:text-7xl font-black leading-tight">
-              Welcome Back
-              <span className="block bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 text-transparent bg-clip-text">
-                {user?.firstName}
-              </span>
-            </h1>
-
-            <p className="text-slate-400 text-lg mt-4 max-w-2xl">
-              Manage your medicines, healthcare activity, AI wellness tracking,
-              and futuristic pharmacy experience in one beautiful dashboard.
+            <p className="text-slate-400 mt-5 max-w-2xl text-lg leading-8">
+              Manage medicines, AI healthcare activity, smart wallet systems,
+              futuristic pharmacy services and secure patient analytics.
             </p>
           </div>
 
-          {/* Right Buttons */}
-          <div className="flex items-center gap-4">
-            <button className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-cyan-500/20 transition duration-300 backdrop-blur-xl">
-              <Bell />
-            </button>
-
-            <button
-              onClick={logoutUser}
-              className="bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition px-6 py-4 rounded-2xl flex items-center gap-3 backdrop-blur-xl"
+          <div className="flex items-center gap-4 flex-wrap">
+            <motion.div
+              whileHover={{
+                scale: 1.08,
+              }}
+              className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-xl"
             >
-              <LogOut size={18} />
+              <Bell className="text-cyan-300" />
+            </motion.div>
+
+            {/* EDIT PROFILE BUTTON */}
+            <motion.button
+              whileHover={{
+                scale: 1.05,
+              }}
+              whileTap={{
+                scale: 0.95,
+              }}
+              onClick={() => setIsEditing(true)}
+              className="bg-cyan-500/20 border border-cyan-400/20 hover:bg-cyan-500/30 px-7 py-4 rounded-3xl flex items-center gap-3 transition duration-300 shadow-[0_0_40px_rgba(34,211,238,0.15)]"
+            >
+              <Edit3 size={20} />
+              Edit Profile
+            </motion.button>
+
+            {/* LOGOUT */}
+            <motion.button
+              whileHover={{
+                scale: 1.05,
+              }}
+              whileTap={{
+                scale: 0.95,
+              }}
+              onClick={logout}
+              className="bg-red-500/20 border border-red-400/20 hover:bg-red-500/30 px-7 py-4 rounded-3xl flex items-center gap-3 transition duration-300 shadow-[0_0_40px_rgba(239,68,68,0.15)]"
+            >
+              <LogOut size={20} />
               Logout
-            </button>
+            </motion.button>
           </div>
-        </motion.div>
+        </div>
 
-        {/* ================= HERO PROFILE ================= */}
-
+        {/* USER CARD */}
         <motion.div
           initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="relative overflow-hidden bg-white/5 border border-white/10 rounded-[45px] backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)] p-10"
+          className="bg-white/5 border border-white/10 backdrop-blur-3xl rounded-[40px] p-8 md:p-12 relative overflow-hidden"
         >
-          {/* Floating Glow */}
-          <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-cyan-500/10 blur-[120px] rounded-full" />
+          <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-cyan-500/10 blur-[120px] rounded-full"></div>
 
-          <div className="grid lg:grid-cols-3 gap-10 items-center">
-            {/* LEFT PROFILE */}
-            <div className="flex flex-col items-center text-center">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            {/* LEFT */}
+            <div>
               <motion.div
                 animate={{
                   y: [0, -10, 0],
@@ -159,144 +326,256 @@ function UserDashboard() {
                   repeat: Infinity,
                   duration: 4,
                 }}
-                className="relative"
+                className="relative mb-8"
               >
-                <div className="absolute inset-0 bg-cyan-500 blur-[40px] opacity-40 rounded-full" />
+                <div className="absolute inset-0 bg-cyan-400 blur-[50px] opacity-40 rounded-full"></div>
 
-                <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 p-8 rounded-full shadow-[0_0_60px_rgba(34,211,238,0.5)]">
-                  <User size={70} />
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center text-5xl font-black shadow-[0_0_60px_rgba(34,211,238,0.5)] relative">
+                  {user.firstName?.charAt(0)}
                 </div>
               </motion.div>
 
-              <h2 className="text-4xl font-black mt-8">
-                {user?.firstName} {user?.lastName}
+              <h2 className="text-4xl font-black mb-3">
+                {user.firstName} {user.lastName}
               </h2>
 
-              <p className="text-slate-400 mt-3 text-lg">
-                {user?.email}
+              <p className="text-slate-400 text-lg leading-8">
+                Experience futuristic healthcare management with intelligent
+                medicine systems and secure account management.
               </p>
 
-              <div className="mt-6 px-6 py-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-bold tracking-wide">
-                {user?.type || "Premium Member"}
+              <div className="flex flex-wrap gap-4 mt-8">
+                <div className="px-5 py-3 rounded-2xl bg-cyan-500/10 border border-cyan-400/20 flex items-center gap-3">
+                  <BadgeCheck className="text-cyan-400" size={18} />
+                  Verified User
+                </div>
               </div>
             </div>
 
-            {/* RIGHT STATS */}
-            <div className="lg:col-span-2 grid md:grid-cols-2 gap-7">
-              {/* CARD */}
-              {[
-                {
-                  title: "Available Fund",
-                  value: `₹ ${user?.fund || 0}`,
-                  icon: Wallet,
-                  color: "green",
-                },
-                {
-                  title: "Account Status",
-                  value: "Active",
-                  icon: ShieldCheck,
-                  color: "cyan",
-                },
-                {
-                  title: "Health Score",
-                  value: "98%",
-                  icon: HeartPulse,
-                  color: "pink",
-                },
-                {
-                  title: "Activity",
-                  value: "Excellent",
-                  icon: Activity,
-                  color: "blue",
-                },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{
-                    scale: 1.04,
-                    y: -5,
-                  }}
-                  className="group relative overflow-hidden bg-white/5 border border-white/10 rounded-[30px] p-7 backdrop-blur-2xl transition duration-500"
-                >
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-cyan-500/10 to-blue-600/10" />
+            {/* RIGHT */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 rounded-[30px] p-7 transition duration-500 backdrop-blur-2xl hover:scale-[1.03]">
+                <Mail className="text-cyan-400 mb-4" size={28} />
 
-                  <div
-                    className={`w-fit p-4 rounded-2xl mb-5 bg-${item.color}-500/10`}
-                  >
-                    <item.icon
-                      className={`text-${item.color}-400`}
-                      size={34}
-                    />
-                  </div>
+                <p className="text-slate-400 mb-2">Email</p>
 
-                  <h3 className="text-xl font-bold mb-3">
-                    {item.title}
-                  </h3>
+                <h3 className="font-bold text-lg break-all">
+                  {user.email}
+                </h3>
+              </div>
 
-                  <p
-                    className={`text-4xl font-black text-${item.color}-400`}
-                  >
-                    {item.value}
-                  </p>
+              <div className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 rounded-[30px] p-7 transition duration-500 backdrop-blur-2xl hover:scale-[1.03]">
+                <ShieldCheck className="text-cyan-400 mb-4" size={28} />
 
-                  <ArrowUpRight className="absolute top-6 right-6 text-slate-500 group-hover:text-cyan-300 transition duration-300" />
-                </motion.div>
-              ))}
+                <p className="text-slate-400 mb-2">Role</p>
+
+                <h3 className="font-bold text-lg">{user.type}</h3>
+              </div>
+
+              <div className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 rounded-[30px] p-7 transition duration-500 backdrop-blur-2xl hover:scale-[1.03]">
+                <Wallet className="text-cyan-400 mb-4" size={28} />
+
+                <p className="text-slate-400 mb-2">Wallet Balance</p>
+
+                <h3 className="font-bold text-lg">₹ {user.fund}</h3>
+              </div>
+
+              <div className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 rounded-[30px] p-7 transition duration-500 backdrop-blur-2xl hover:scale-[1.03]">
+                <Calendar className="text-cyan-400 mb-4" size={28} />
+
+                <p className="text-slate-400 mb-2">Joined On</p>
+
+                <h3 className="font-bold text-lg">
+                  {new Date(user.createdOn).toLocaleDateString()}
+                </h3>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* ================= QUICK ACTIONS ================= */}
+        {/* EDIT PROFILE MODAL */}
+        {isEditing && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-full max-w-2xl bg-[#07111f] border border-white/10 rounded-[40px] p-8 md:p-10 overflow-hidden shadow-[0_0_80px_rgba(34,211,238,0.15)]"
+            >
+              <div className="absolute top-[-80px] right-[-80px] w-[220px] h-[220px] bg-cyan-500/20 blur-[120px] rounded-full"></div>
 
-        <div className="mt-16">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-4xl font-black">
-              Quick Actions
-            </h2>
+              {/* HEADER */}
+              <div className="flex items-start justify-between gap-5 mb-10 relative z-10">
+                <div>
+                  <h2 className="text-4xl font-black">
+                    Edit Profile
+                  </h2>
 
-            <div className="text-cyan-300 text-sm tracking-widest">
-              SMART FEATURES
-            </div>
-          </div>
+                  <p className="text-slate-400 mt-3">
+                    Update your healthcare profile securely
+                  </p>
+                </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Medicines",
-                desc: "Browse futuristic healthcare products and premium medicines.",
-                icon: Pill,
-                color: "cyan",
-              },
-              {
-                title: "My Cart",
-                desc: "View added medicines and complete secure checkout instantly.",
-                icon: ShoppingCart,
-                color: "green",
-              },
-              {
-                title: "Orders",
-                desc: "Track healthcare orders and smart prescription delivery.",
-                icon: ClipboardList,
-                color: "purple",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                whileHover={{
-                  y: -12,
-                  scale: 1.02,
-                }}
-                className="group relative overflow-hidden bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-2xl cursor-pointer transition duration-500"
-              >
-                {/* Glow */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-cyan-500/10 to-blue-500/10" />
-
-                <div
-                  className={`w-fit p-5 rounded-3xl bg-${item.color}-500/10 mb-6`}
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 transition flex items-center justify-center text-2xl"
                 >
+                  ×
+                </button>
+              </div>
+
+              {/* FORM */}
+              <div className="grid md:grid-cols-2 gap-7 relative z-10">
+                {/* FIRST NAME */}
+                <div>
+                  <label className="block mb-3 text-slate-300">
+                    First Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={editData.firstName}
+                    onChange={handleChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400 transition"
+                  />
+                </div>
+
+                {/* LAST NAME */}
+                <div>
+                  <label className="block mb-3 text-slate-300">
+                    Last Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={editData.lastName}
+                    onChange={handleChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400 transition"
+                  />
+                </div>
+
+                {/* EMAIL */}
+                <div className="md:col-span-2">
+                  <label className="block mb-3 text-slate-300">
+                    Email Address
+                  </label>
+
+                  <div className="relative">
+                    <Mail
+                      className="absolute left-5 top-1/2 -translate-y-1/2 text-cyan-400"
+                      size={20}
+                    />
+
+                    <input
+                      type="email"
+                      value={editData.email}
+                      disabled
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-5 py-4 outline-none opacity-60 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <p className="text-slate-500 text-sm mt-2">
+                    Email cannot be changed for security reasons
+                  </p>
+                </div>
+
+                {/* PASSWORD */}
+                <div className="md:col-span-2">
+                  <label className="block mb-3 text-slate-300">
+                    Password
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={editData.password}
+                      onChange={handleChange}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 pr-14 outline-none focus:border-cyan-400 transition"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(!showPassword)
+                      }
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition"
+                    >
+                      {showPassword ? (
+                        <EyeOff size={22} />
+                      ) : (
+                        <Eye size={22} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-10 relative z-10">
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                  }}
+                  onClick={updateProfile}
+                  className="flex-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-8 py-5 rounded-3xl font-black flex items-center justify-center gap-4 shadow-[0_0_50px_rgba(34,211,238,0.35)] text-lg"
+                >
+                  <Save size={22} />
+                  Save Changes
+                </motion.button>
+
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-8 py-5 rounded-3xl border border-white/10 bg-white/5 hover:bg-white/10 transition font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* FEATURES */}
+        <div className="grid md:grid-cols-3 gap-8 mt-16">
+          {[
+            {
+              icon: Activity,
+              title: "Smart Tracking",
+              desc: "Track medicines, wallet transactions and healthcare analytics in real-time.",
+            },
+
+            {
+              icon: HeartPulse,
+              title: "AI Healthcare",
+              desc: "Advanced AI recommendation systems for futuristic healthcare experience.",
+            },
+
+            {
+              icon: User,
+              title: "Secure Account",
+              desc: "Your medical profile is protected using intelligent encrypted systems.",
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              whileHover={{
+                y: -10,
+                scale: 1.03,
+              }}
+              className="group relative overflow-hidden bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-3xl transition duration-500"
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-cyan-500/10 to-blue-500/10"></div>
+
+              <div className="relative z-10">
+                <div className="w-fit p-5 rounded-3xl bg-cyan-500/10 mb-6">
                   <item.icon
-                    className={`text-${item.color}-400`}
-                    size={40}
+                    className="text-cyan-400"
+                    size={42}
                   />
                 </div>
 
@@ -308,42 +587,54 @@ function UserDashboard() {
                   {item.desc}
                 </p>
 
-                <div className="mt-8 flex items-center gap-2 text-cyan-300 font-semibold">
-                  Explore
-                  <ArrowUpRight size={18} />
+                <div className="mt-6 flex items-center gap-2 text-cyan-300 font-semibold">
+                  Explore More
+                  <TrendingUp size={18} />
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
-        {/* ================= FOOTER ================= */}
-
+        {/* FOOTER */}
         <footer className="mt-24 border-t border-white/10 pt-10 pb-6 text-center">
           <motion.div
             animate={{
-              opacity: [0.6, 1, 0.6],
+              opacity: [0.5, 1, 0.5],
             }}
             transition={{
               repeat: Infinity,
               duration: 3,
             }}
-            className="text-slate-400"
           >
-            <h2 className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text mb-3">
+            <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 text-transparent bg-clip-text mb-4">
               PharmaNest
             </h2>
 
-            <p className="text-slate-500">
-              Crafted with futuristic healthcare vision ✨
+            <p className="text-slate-400 text-lg">
+              Next Generation AI Powered Healthcare Platform ✨
             </p>
 
-            <p className="mt-6 text-sm text-slate-600">
+            <div className="flex items-center justify-center gap-5 mt-8 flex-wrap">
+              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10">
+                Smart Pharmacy
+              </div>
+
+              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10">
+                AI Recommendation
+              </div>
+
+              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10">
+                Secure Wallet
+              </div>
+
+              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10">
+                Real-time Tracking
+              </div>
+            </div>
+
+            <p className="mt-8 text-slate-500">
               © 2026 PharmaNest. All Rights Reserved.
-              <span className="text-cyan-400">
-                {" "}
-                Developed By Nabarun B
-              </span>
             </p>
           </motion.div>
         </footer>
