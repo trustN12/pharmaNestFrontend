@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Package,
   Activity,
+  LogOut,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -139,29 +140,33 @@ function AdminDashboard() {
   };
 
   // ============================================
-  // FETCH MEDICINES
-  // ============================================
+// FETCH MEDICINES
+// ============================================
 
-  const fetchMedicines = async () => {
+const fetchMedicines = async () => {
 
-    try {
+  try {
 
-      const response = await axios.get(
-        "http://localhost:5281/api/Admin/GetMedicines"
-      );
+    const response = await axios.get(
+      "http://localhost:5281/api/Medicines/MedicineList"
+    );
 
-      if (response.data.statusCode === 200) {
+    console.log("MEDICINES API:", response.data);
 
-        setMedicines(response.data.listMedicines);
+    const data =
+      response.data?.listMedicines ||
+      response.data?.medicines ||
+      response.data ||
+      [];
 
-      }
+    setMedicines(Array.isArray(data) ? data : []);
 
-    } catch (error) {
+  } catch (error) {
 
-      console.log(error);
+    console.log(error);
 
-    }
-  };
+  }
+};
 
   // ============================================
   // ANALYTICS DATA
@@ -184,6 +189,37 @@ function AdminDashboard() {
       total: medicines.length,
     },
   ];
+
+
+  // ============================================
+// LOGOUT
+// ============================================
+
+const handleLogout = () => {
+
+  // CLEAR STORAGE
+  localStorage.removeItem("token");
+  localStorage.removeItem("admin");
+
+  sessionStorage.clear();
+
+  // REMOVE HISTORY + REDIRECT
+  window.history.pushState(null, "", "/login");
+
+  window.location.replace("/login");
+};
+
+
+useEffect(() => {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+
+    window.location.replace("/login");
+  }
+
+}, []);
 
   return (
 
@@ -226,7 +262,7 @@ function AdminDashboard() {
                 <Sparkles className="text-cyan-400" size={18} />
 
                 <p className="text-cyan-300 tracking-[3px] uppercase text-sm font-bold">
-                  AI Admin Control Center
+                   Admin Control Center
                 </p>
 
               </motion.div>
@@ -250,7 +286,7 @@ function AdminDashboard() {
               <p className="text-slate-400 text-lg mt-6 max-w-2xl leading-8">
 
                 Realtime monitoring of medicines, users,
-                pharmacy orders and SQL analytics inside
+                pharmacy orders and analytics inside
                 PharmaNest Admin Dashboard.
 
               </p>
@@ -299,7 +335,18 @@ function AdminDashboard() {
 
                   </div>
 
-                  <Bell className="text-cyan-300" />
+                  <div className="flex items-center gap-3">
+
+  <Bell className="text-cyan-300" />
+
+  <button
+    onClick={handleLogout}
+    className="p-3 rounded-2xl bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition"
+  >
+    <LogOut size={18} className="text-red-300" />
+  </button>
+
+</div>
 
                 </div>
 
@@ -432,7 +479,7 @@ function AdminDashboard() {
 
                   <TrendingUp size={18} />
 
-                  Live SQL Analytics
+                  Live Analytics
 
                 </div>
 

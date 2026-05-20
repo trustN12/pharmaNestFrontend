@@ -16,9 +16,9 @@ import {
 
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
+import { toast } from "react-hot-toast";
 
-const API_BASE_URL =
-  "http://localhost:5281/api/Medicines/MedicineList";
+const API_BASE_URL = "http://localhost:5281/api/Medicines/MedicineList";
 
 function Medicines() {
   const [medicines, setMedicines] = useState([]);
@@ -28,6 +28,10 @@ function Medicines() {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [error, setError] = useState("");
+
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const modalRef = useRef(null);
 
@@ -49,7 +53,7 @@ function Medicines() {
       gsap.fromTo(
         modalRef.current,
         { scale: 0.8, opacity: 0, y: 40 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.4 }
+        { scale: 1, opacity: 1, y: 0, duration: 0.4 },
       );
     }
   }, [selectedMedicine]);
@@ -60,10 +64,7 @@ function Medicines() {
       const res = await axios.get(API_BASE_URL);
 
       const data =
-        res.data?.listMedicines ||
-        res.data?.medicines ||
-        res.data ||
-        [];
+        res.data?.listMedicines || res.data?.medicines || res.data || [];
 
       setMedicines(Array.isArray(data) ? data : []);
     } catch {
@@ -79,13 +80,9 @@ function Medicines() {
     try {
       setDeleteLoading(id);
 
-      await axios.delete(
-        `${API_BASE_URL}/deleteMedicine/${id}`
-      );
+      await axios.delete(`${API_BASE_URL}/deleteMedicine/${id}`);
 
-      setMedicines((prev) =>
-        prev.filter((m) => m.id !== id)
-      );
+      setMedicines((prev) => prev.filter((m) => m.id !== id));
     } catch {
       alert("Delete failed");
     } finally {
@@ -93,22 +90,106 @@ function Medicines() {
     }
   };
 
-  const getName = (m) => m?.name || m?.medicineName || "Unknown";
-  const getPrice = (m) => m?.price || m?.unitPrice || 0;
-  const getStock = (m) => m?.quantity || m?.stock || 0;
+  // ================= EDIT INPUT CHANGE =================
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+
+    setEditData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ================= SAVE MEDICINE =================
+  const saveMedicine = async () => {
+    try {
+      setSaveLoading(true);
+
+      const payload = {
+        id: editData.id,
+
+        medicineName: editData.medicineName || "",
+
+        manufacturer: editData.manufacturer || "",
+
+        category: editData.category || "",
+
+        unitPrice: Number(editData.unitPrice || 0),
+
+        discountedPrice: Number(editData.discountedPrice || 0),
+
+        stock: Number(editData.stock || 0),
+
+        expiryDate: editData.expiryDate || "",
+
+        description: editData.description || "",
+
+        imageUrl: editData.imageUrl || "",
+      };
+
+      // UPDATE DATABASE
+      const res = await axios.post(
+        "http://localhost:5281/api/Medicines/AddUpdateMedicine",
+        payload,
+      );
+
+      if (res.data.statusCode === 200 || res.status === 200) {
+        // REFRESH DATABASE DATA
+        await fetchMedicines();
+
+        // UPDATE MODAL DATA
+        const updatedMedicine = {
+          ...selectedMedicine,
+          ...payload,
+        };
+
+        setSelectedMedicine(updatedMedicine);
+
+        // CLOSE EDIT MODE
+        setEditMode(false);
+
+        toast.success("Medicine updated successfully");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Update failed");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const getName = (m) => m?.medicineName || "Unknown";
+
+  const getPrice = (m) => m?.unitPrice || 0;
+
+  const getStock = (m) => m?.stock || 0;
 
   const filtered = useMemo(() => {
     return medicines.filter((m) =>
-      getName(m).toLowerCase().includes(search.toLowerCase())
+      getName(m).toLowerCase().includes(search.toLowerCase()),
     );
   }, [medicines, search]);
+
+
+
+  // LOCK BODY SCROLL WHEN MODAL OPEN
+useEffect(() => {
+  if (selectedMedicine) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [selectedMedicine]);
 
   return (
     <div className="flex min-h-screen bg-[#020617] text-white overflow-hidden">
       <AdminSidebar />
 
       <div className="flex-1 relative overflow-y-auto">
-
         {/* DREAMY BACKGROUND */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-200px] left-[-150px] w-[500px] h-[500px] bg-cyan-500/20 blur-[160px] rounded-full" />
@@ -116,7 +197,6 @@ function Medicines() {
         </div>
 
         <div className="relative z-10 p-6 md:p-10">
-
           {/* HEADER */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,9 +206,7 @@ function Medicines() {
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="text-cyan-400" />
-                <p className="text-cyan-300 text-sm">
-                  PharmaNest Inventory
-                </p>
+                <p className="text-cyan-300 text-sm">PharmaNest Inventory</p>
               </div>
 
               <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 bg-clip-text text-transparent">
@@ -145,9 +223,7 @@ function Medicines() {
                 <Boxes className="text-cyan-400" />
                 <div>
                   <p className="text-slate-400 text-sm">Total</p>
-                  <h2 className="text-4xl font-black">
-                    {medicines.length}
-                  </h2>
+                  <h2 className="text-4xl font-black">{medicines.length}</h2>
                 </div>
               </div>
             </div>
@@ -208,11 +284,22 @@ function Medicines() {
                     </p>
 
                     <div className="flex gap-3 mt-6">
-                      <button
+                      {/* <button
                         onClick={() => setSelectedMedicine(m)}
                         className="flex-1 bg-cyan-500/20 py-3 rounded-2xl flex justify-center"
                       >
                         <Eye />
+                      </button> */}
+
+                      <button
+                        onClick={() => {
+                          setSelectedMedicine(m);
+                          setEditData(m);
+                          setEditMode(false);
+                        }}
+                        className="flex-1 bg-cyan-500/20 py-3 rounded-2xl flex justify-center"
+                      >
+                        <Eye size={18} />
                       </button>
 
                       <button
@@ -232,141 +319,175 @@ function Medicines() {
             </div>
           )}
 
-         
-         {/* MODAL */}
-<AnimatePresence>
-  {selectedMedicine && (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={() => setSelectedMedicine(null)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      {/* BACKDROP */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-xl" />
+          {/* MODAL */}
+          <AnimatePresence>
+            {selectedMedicine && (
+              <motion.div
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                onClick={() => setSelectedMedicine(null)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* BACKDROP */}
+                <div className="absolute inset-0 bg-black/70 backdrop-blur-xl" />
 
-      {/* MODAL CARD */}
-      <motion.div
-        initial={{ scale: 0.85, y: 30, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.85, y: 20, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 140, damping: 18 }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
-      >
-        {/* GLOW DECOR */}
-        <div className="absolute -top-20 -left-20 w-60 h-60 bg-cyan-500/20 blur-[120px] rounded-full" />
-        <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-fuchsia-500/20 blur-[120px] rounded-full" />
+                {/* MODAL CARD */}
+                <motion.div
+                  initial={{ scale: 0.85, y: 30, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.85, y: 20, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 18 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+                >
+                  {/* GLOW DECOR */}
+                  <div className="absolute -top-20 -left-20 w-60 h-60 bg-cyan-500/20 blur-[120px] rounded-full" />
+                  <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-fuchsia-500/20 blur-[120px] rounded-full" />
 
-        {/* CLOSE BUTTON */}
-        <button
-          onClick={() => setSelectedMedicine(null)}
-          className="absolute top-4 right-4 p-2 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 transition"
-        >
-          <X size={18} />
-        </button>
+                  {/* CLOSE BUTTON */}
+                  <button
+                    onClick={() => setSelectedMedicine(null)}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 transition"
+                  >
+                    <X size={18} />
+                  </button>
 
-        {/* CONTENT */}
-        <div className="p-6 space-y-6">
+                  {/* CONTENT */}
+                  {/* CONTENT */}
+                  <div className="p-6 space-y-6">
+                    <div className="space-y-4 mt-6">
+                      {/* NAME */}
+                      <div>
+                        <label className="text-sm text-gray-400">
+                          Medicine Name
+                        </label>
 
-          {/* TITLE */}
-          <div>
-            <h2 className="text-3xl font-black text-white tracking-tight">
-              {selectedMedicine.name}
-            </h2>
-            <p className="text-slate-400 text-sm mt-1">
-              Premium Medicine Detail View
-            </p>
-          </div>
+                        {editMode ? (
+                          <input
+                            type="text"
+                            name="medicineName"
+                            value={editData.medicineName || editData.name || ""}
+                            onChange={handleEditChange}
+                            className="w-full mt-1 bg-[#0f172a] border border-cyan-500/30 rounded-xl p-3 outline-none"
+                          />
+                        ) : (
+                          <p className="text-xl font-bold">
+                            {getName(selectedMedicine)}
+                          </p>
+                        )}
+                      </div>
 
-          {/* STATUS */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-4 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-400/20">
-              ACTIVE ITEM
-            </span>
+                      {/* PRICE */}
+                      <div>
+                        <label className="text-sm text-gray-400">Price</label>
 
-            <span className="px-4 py-1 rounded-full text-xs font-bold bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-400/20">
-              INVENTORY READY
-            </span>
-          </div>
+                        {editMode ? (
+                          <input
+                            type="number"
+                            name="unitPrice"
+                            value={editData.unitPrice || editData.price || ""}
+                            onChange={handleEditChange}
+                            className="w-full mt-1 bg-[#0f172a] border border-cyan-500/30 rounded-xl p-3 outline-none"
+                          />
+                        ) : (
+                          <p className="text-lg text-cyan-300">
+                            ₹{getPrice(selectedMedicine)}
+                          </p>
+                        )}
+                      </div>
 
-          {/* INFO GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* STOCK */}
+                      <div>
+                        <label className="text-sm text-gray-400">Stock</label>
 
-            {/* UNIT PRICE */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:scale-[1.02] transition">
-              <p className="text-xs text-slate-400">UNIT PRICE</p>
-              <p className="text-2xl font-black text-green-400 mt-1">
-                ₹ {selectedMedicine.unitPrice || selectedMedicine.price || 0}
-              </p>
-            </div>
+                        {editMode ? (
+                          <input
+                            type="number"
+                            name="stock"
+                            value={editData.stock || ""}
+                            onChange={handleEditChange}
+                            className="w-full mt-1 bg-[#0f172a] border border-cyan-500/30 rounded-xl p-3 outline-none"
+                          />
+                        ) : (
+                          <p className="text-lg">
+                            {getStock(selectedMedicine)}
+                          </p>
+                        )}
+                      </div>
 
-            {/* DISCOUNTED PRICE */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:scale-[1.02] transition">
-              <p className="text-xs text-slate-400">DISCOUNTED PRICE</p>
-              <p className="text-2xl font-black text-yellow-400 mt-1">
-                ₹ {selectedMedicine.discountedPrice || selectedMedicine.discount || 0}
-              </p>
-            </div>
+                      {/* DESCRIPTION */}
+                      <div>
+                        <label className="text-sm text-gray-400">
+                          Description
+                        </label>
 
-            {/* STOCK */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:scale-[1.02] transition">
-              <p className="text-xs text-slate-400">STOCK</p>
-              <p className="text-2xl font-black text-cyan-300 mt-1">
-                {selectedMedicine.stock || selectedMedicine.quantity || 0}
-              </p>
-            </div>
+                        {editMode ? (
+                          <textarea
+                            name="description"
+                            value={editData.description || ""}
+                            onChange={handleEditChange}
+                            rows={4}
+                            className="w-full mt-1 bg-[#0f172a] border border-cyan-500/30 rounded-xl p-3 outline-none"
+                          />
+                        ) : (
+                          <p className="text-gray-300">
+                            {selectedMedicine?.description || "No description"}
+                          </p>
+                        )}
+                      </div>
 
-            {/* CATEGORY */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:scale-[1.02] transition">
-              <p className="text-xs text-slate-400">CATEGORY</p>
-              <p className="text-lg font-semibold text-white mt-1">
-                {selectedMedicine.category || "General Medicine"}
-              </p>
-            </div>
+                      {/* BUTTONS */}
+                      <div className="flex gap-3 pt-4">
+                        {editMode ? (
+                          <>
+                            <button
+                              onClick={saveMedicine}
+                              disabled={saveLoading}
+                              className="flex-1 py-3 rounded-2xl bg-cyan-400 text-black font-bold"
+                            >
+                              {saveLoading ? "Saving..." : "Save Changes"}
+                            </button>
 
-            {/* MANUFACTURER */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:scale-[1.02] transition sm:col-span-2">
-              <p className="text-xs text-slate-400">MANUFACTURER</p>
-              <p className="text-lg font-semibold text-white mt-1">
-                {selectedMedicine.manufacturer || "Not Available"}
-              </p>
-            </div>
+                            <button
+                              onClick={() => {
+                                // RESET FORM
+                                setEditData({ ...selectedMedicine });
 
-          </div>
+                                // EXIT EDIT MODE
+                                setTimeout(() => {
+                                  setEditMode(false);
+                                }, 0);
+                              }}
+                              className="flex-1 py-3 rounded-2xl bg-red-500/20 border border-red-500/30"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setSelectedMedicine(null)}
+                              className="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10"
+                            >
+                              Close
+                            </button>
 
-          {/* DESCRIPTION */}
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-            <p className="text-xs text-slate-400 mb-2">
-              DESCRIPTION
-            </p>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              {selectedMedicine.description ||
-                "No description available for this medicine."}
-            </p>
-          </div>
-
-          {/* ACTIONS */}
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => setSelectedMedicine(null)}
-              className="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition"
-            >
-              Close
-            </button>
-
-            <button className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-fuchsia-500 text-white font-bold shadow-lg hover:scale-[1.02] transition">
-              Edit Medicine
-            </button>
-          </div>
-
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
+                            <button
+                              onClick={() => setEditMode(true)}
+                              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-fuchsia-500 font-bold"
+                            >
+                              Edit Medicine
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

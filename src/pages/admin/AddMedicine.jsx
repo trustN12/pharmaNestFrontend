@@ -17,11 +17,10 @@ import {
 } from "lucide-react";
 
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 function AddMedicine() {
-
   const [medicine, setMedicine] = useState({
-
     id: 0,
 
     medicineName: "",
@@ -41,7 +40,6 @@ function AddMedicine() {
     description: "",
 
     imageUrl: "",
-
   });
 
   const [loading, setLoading] = useState(false);
@@ -51,13 +49,10 @@ function AddMedicine() {
   // ============================================
 
   const handleChange = (e) => {
-
     setMedicine({
-
       ...medicine,
 
       [e.target.name]: e.target.value,
-
     });
   };
 
@@ -66,15 +61,12 @@ function AddMedicine() {
   // ============================================
 
   const addMedicine = async (e) => {
-
     e.preventDefault();
 
     try {
-
       setLoading(true);
 
       const payload = {
-
         id: medicine.id,
 
         medicineName: medicine.medicineName,
@@ -94,24 +86,21 @@ function AddMedicine() {
         description: medicine.description,
 
         imageUrl: medicine.imageUrl,
-
       };
 
       console.log(payload);
 
       const response = await axios.post(
-        "http://localhost:5281/api/Admin/AddUpdateMedicine",
-        payload
+        "http://localhost:5281/api/Medicines/AddUpdateMedicine",
+        payload,
       );
 
       console.log(response.data);
 
       if (response.data.statusCode === 200) {
-
-        alert("Medicine Added Successfully");
+        toast("Medicine Added Successfully");
 
         setMedicine({
-
           id: 0,
 
           medicineName: "",
@@ -131,34 +120,23 @@ function AddMedicine() {
           description: "",
 
           imageUrl: "",
-
         });
-
       } else {
-
         alert(response.data.statusMessage);
-
       }
-
     } catch (error) {
-
       console.log(error);
 
       console.log(error.response?.data);
 
-      alert("Something went wrong");
-
+      toast("Something went wrong");
     } finally {
-
       setLoading(false);
-
     }
   };
 
   return (
-
     <div className="flex bg-[#020617] min-h-screen text-white overflow-hidden">
-
       {/* SIDEBAR */}
 
       <AdminSidebar />
@@ -166,19 +144,15 @@ function AddMedicine() {
       {/* MAIN */}
 
       <div className="flex-1 overflow-auto relative">
-
         {/* BACKGROUND */}
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-
           <div className="absolute top-[-120px] left-[-120px] w-[350px] h-[350px] bg-cyan-500/20 blur-[140px] rounded-full"></div>
 
           <div className="absolute bottom-[-120px] right-[-120px] w-[350px] h-[350px] bg-blue-500/20 blur-[140px] rounded-full"></div>
-
         </div>
 
         <div className="relative z-10 p-4 md:p-8">
-
           {/* HEADER */}
 
           <motion.div
@@ -186,31 +160,21 @@ function AddMedicine() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-12"
           >
-
             <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/5 border border-cyan-400/20 backdrop-blur-xl mb-6">
-
               <PlusCircle className="text-cyan-300" size={18} />
 
               <p className="text-cyan-300 uppercase tracking-[3px] text-sm font-bold">
-
                 PharmaNest Admin
-
               </p>
-
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black">
-
               Add New Medicine
-
             </h1>
 
             <p className="text-slate-400 mt-4 text-lg">
-
               Upload medicine details directly into SQL database.
-
             </p>
-
           </motion.div>
 
           {/* FORM */}
@@ -221,19 +185,13 @@ function AddMedicine() {
             onSubmit={addMedicine}
             className="bg-white/5 border border-white/10 rounded-[40px] p-6 md:p-10 backdrop-blur-3xl max-w-6xl"
           >
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
               {/* MEDICINE NAME */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <Pill size={18} />
-
                   Medicine Name
-
                 </label>
 
                 <input
@@ -245,19 +203,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* MANUFACTURER */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <Factory size={18} />
-
                   Manufacturer
-
                 </label>
 
                 <input
@@ -269,19 +222,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* CATEGORY */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <Layers3 size={18} />
-
                   Category
-
                 </label>
 
                 <input
@@ -289,23 +237,18 @@ function AddMedicine() {
                   name="category"
                   value={medicine.category}
                   onChange={handleChange}
-                  placeholder="Tablet / Syrup / Injection"
+                  placeholder="Tablet / Syrup / Injection / Gel"
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* UNIT PRICE */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <IndianRupee size={18} />
-
                   Unit Price
-
                 </label>
 
                 <input
@@ -317,19 +260,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* DISCOUNTED PRICE */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <BadgePercent size={18} />
-
                   Discounted Price
-
                 </label>
 
                 <input
@@ -341,19 +279,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* STOCK */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <Package2 size={18} />
-
                   Stock Quantity
-
                 </label>
 
                 <input
@@ -365,19 +298,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* EXPIRY DATE */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <CalendarDays size={18} />
-
                   Expiry Date
-
                 </label>
 
                 <input
@@ -388,19 +316,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* IMAGE URL */}
 
               <div>
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <ImagePlus size={18} />
-
                   Medicine Image URL
-
                 </label>
 
                 <input
@@ -412,19 +335,14 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
                 />
-
               </div>
 
               {/* DESCRIPTION */}
 
               <div className="md:col-span-2">
-
                 <label className="flex items-center gap-2 mb-3 text-cyan-300 font-semibold">
-
                   <FileText size={18} />
-
                   Description
-
                 </label>
 
                 <textarea
@@ -436,9 +354,7 @@ function AddMedicine() {
                   required
                   className="w-full bg-[#0f172a] border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400 resize-none"
                 />
-
               </div>
-
             </div>
 
             {/* BUTTON */}
@@ -448,21 +364,11 @@ function AddMedicine() {
               disabled={loading}
               className="mt-10 w-full md:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 font-bold text-lg hover:scale-[1.02] transition-all shadow-[0_0_30px_rgba(34,211,238,0.35)] disabled:opacity-50"
             >
-
-              {
-                loading
-                  ? "Adding Medicine..."
-                  : "Add Medicine"
-              }
-
+              {loading ? "Adding Medicine..." : "Add Medicine"}
             </button>
-
           </motion.form>
-
         </div>
-
       </div>
-
     </div>
   );
 }
