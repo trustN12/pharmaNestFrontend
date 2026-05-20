@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+
 
 import {
   User,
@@ -39,6 +41,10 @@ function UserDashboard() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const [cartItems, setCartItems] = useState([]);
+
+  const [medicines, setMedicines] = useState([]);
+
   const [editData, setEditData] = useState({
     id: "",
     firstName: "",
@@ -69,7 +75,7 @@ function UserDashboard() {
         "http://localhost:5281/api/Users/ViewUser",
         {
           ID: id,
-        }
+        },
       );
 
       if (response.data.statusCode === 200) {
@@ -94,6 +100,120 @@ function UserDashboard() {
     }
   };
 
+// ================= FETCH CART =================
+ const fetchCart = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!user?.id) return;
+
+    const res = await axios.post(
+      "http://localhost:5281/api/Medicines/GetCart",
+      { userId: user.id }
+    );
+
+    setCartItems(res.data.listCart || []);
+  } catch (err) {
+    console.log("Cart fetch error:", err);
+  }
+};
+
+useEffect(() => {
+  fetchCart();
+}, []);
+
+
+// ================= FETCH MEDICINES =================
+
+const fetchMedicines = async () => {
+  try {
+    const res = await axios.get("http://localhost:5281/api/Medicines/MedicineList");
+
+    if (res.data.statusCode === 200) {
+      setMedicines(res.data.listMedicines);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+useEffect(() => {
+  fetchMedicines();
+}, []);
+
+// ================= UPDATE QUANTITY =================
+const updateQty = async (item, change) => {
+  let newQty = item.quantity + change;
+
+  if (newQty < 1) newQty = 1;
+  if (newQty > 5) return; // max limit
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5281/api/Medicines/UpdateCartQuantity",
+      {
+        id: item.id,
+        quantity: newQty,
+      }
+    );
+
+    if (res.data.statusCode === 200) {
+      setCartItems((prev) =>
+        prev.map((c) =>
+          c.id === item.id
+            ? {
+                ...c,
+                quantity: newQty,
+                totalPrice: newQty * c.unitPrice,
+              }
+            : c
+        )
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// ================= REMOVE ITEMS =================
+const removeFromCart = async (id) => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5281/api/Medicines/DeleteCartItem",
+      { id }
+    );
+
+    if (res.data.statusCode === 200) {
+      setCartItems((prev) => prev.filter((c) => c.id !== id));
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+ // ================= PLACE ORDER =================
+const placeOrder = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const res = await axios.post(
+      "http://localhost:5281/api/Medicines/PlaceOrder",
+      {
+        userId: user.id,
+      }
+    );
+
+    if (res.data.statusCode === 200) {
+      toast.success("Order Placed Successfully 🎉");
+      setCartItems([]);
+    } else {
+      toast.error(res.data.statusMessage);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
   // ================= HANDLE CHANGE =================
 
   const handleChange = (e) => {
@@ -115,7 +235,7 @@ function UserDashboard() {
           LastName: editData.lastName,
           Email: editData.email,
           Password: editData.password,
-        }
+        },
       );
 
       if (response.data.statusCode === 200) {
@@ -143,6 +263,38 @@ function UserDashboard() {
       toast.error("Update failed");
     }
   };
+
+ // ================= ADDTOCART =================
+ const addToCart = async (medicine) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const payload = {
+      userId: user.id,
+      medicineID: medicine.id,
+      quantity: 1,
+      unitPrice: medicine.unitPrice,
+      discountedPrice: medicine.discountedPrice,
+      totalPrice: medicine.discountedPrice,
+    };
+
+    const res = await axios.post(
+      "http://localhost:5281/api/Medicines/AddToCart",
+      payload
+    );
+
+    if (res.data.statusCode === 200) {
+      toast.success("Added to Cart 🛒");
+
+      // 🔥 refresh cart instantly
+      fetchCart();
+    } else {
+      toast.error(res.data.statusMessage);
+    }
+  } catch (err) {
+    toast.error("Error adding to cart");
+  }
+};
 
   // ================= LOGOUT =================
 
@@ -274,6 +426,26 @@ function UserDashboard() {
               <Bell className="text-cyan-300" />
             </motion.div>
 
+
+{/* CART */}
+            <motion.div
+  onClick={() => document.getElementById("cartSection").scrollIntoView({ behavior: "smooth" })}
+  whileHover={{ scale: 1.08 }}
+  className="relative w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer"
+>
+  <ShoppingCart
+  onClick={() => navigate("/cart")}
+  className="cursor-pointer"
+/>
+
+  {/* BADGE */}
+  {cartItems.length > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full">
+      {cartItems.reduce((a, b) => a + b.quantity, 0)}
+    </span>
+  )}
+</motion.div>
+
             {/* EDIT PROFILE BUTTON */}
             <motion.button
               whileHover={{
@@ -359,9 +531,7 @@ function UserDashboard() {
 
                 <p className="text-slate-400 mb-2">Email</p>
 
-                <h3 className="font-bold text-lg break-all">
-                  {user.email}
-                </h3>
+                <h3 className="font-bold text-lg break-all">{user.email}</h3>
               </div>
 
               <div className="group bg-white/5 hover:bg-white/[0.08] border border-white/10 rounded-[30px] p-7 transition duration-500 backdrop-blur-2xl hover:scale-[1.03]">
@@ -407,9 +577,7 @@ function UserDashboard() {
               {/* HEADER */}
               <div className="flex items-start justify-between gap-5 mb-10 relative z-10">
                 <div>
-                  <h2 className="text-4xl font-black">
-                    Edit Profile
-                  </h2>
+                  <h2 className="text-4xl font-black">Edit Profile</h2>
 
                   <p className="text-slate-400 mt-3">
                     Update your healthcare profile securely
@@ -443,9 +611,7 @@ function UserDashboard() {
 
                 {/* LAST NAME */}
                 <div>
-                  <label className="block mb-3 text-slate-300">
-                    Last Name
-                  </label>
+                  <label className="block mb-3 text-slate-300">Last Name</label>
 
                   <input
                     type="text"
@@ -483,9 +649,7 @@ function UserDashboard() {
 
                 {/* PASSWORD */}
                 <div className="md:col-span-2">
-                  <label className="block mb-3 text-slate-300">
-                    Password
-                  </label>
+                  <label className="block mb-3 text-slate-300">Password</label>
 
                   <div className="relative">
                     <input
@@ -498,16 +662,10 @@ function UserDashboard() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(!showPassword)
-                      }
+                      onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition"
                     >
-                      {showPassword ? (
-                        <EyeOff size={22} />
-                      ) : (
-                        <Eye size={22} />
-                      )}
+                      {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                     </button>
                   </div>
                 </div>
@@ -573,19 +731,12 @@ function UserDashboard() {
 
               <div className="relative z-10">
                 <div className="w-fit p-5 rounded-3xl bg-cyan-500/10 mb-6">
-                  <item.icon
-                    className="text-cyan-400"
-                    size={42}
-                  />
+                  <item.icon className="text-cyan-400" size={42} />
                 </div>
 
-                <h3 className="text-3xl font-black mb-4">
-                  {item.title}
-                </h3>
+                <h3 className="text-3xl font-black mb-4">{item.title}</h3>
 
-                <p className="text-slate-400 leading-8 text-lg">
-                  {item.desc}
-                </p>
+                <p className="text-slate-400 leading-8 text-lg">{item.desc}</p>
 
                 <div className="mt-6 flex items-center gap-2 text-cyan-300 font-semibold">
                   Explore More
@@ -595,6 +746,49 @@ function UserDashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* ================= MEDICINES SECTION ================= */}
+        <div className="mt-20">
+          <h2 className="text-3xl font-black mb-8">Available Medicines</h2>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {medicines?.map((m) => (
+              <motion.div
+                key={m.id}
+                whileHover={{ scale: 1.03 }}
+                className="bg-white/5 border border-white/10 rounded-[30px] p-6 backdrop-blur-2xl"
+              >
+                <h3 className="text-xl font-bold">{m.medicineName}</h3>
+
+                <p className="text-slate-400 text-sm mt-1">
+                  {m.manufacturer} • {m.category}
+                </p>
+
+                <div className="mt-3 flex gap-3 items-center">
+                  <p className="text-emerald-400 font-bold text-lg">
+                    ₹{m.discountedPrice}
+                  </p>
+                  <p className="line-through text-slate-500 text-sm">
+                    ₹{m.unitPrice}
+                  </p>
+                </div>
+
+                <p className="text-xs text-slate-400 mt-3 line-clamp-2">
+                  {m.description}
+                </p>
+
+                <button
+                  onClick={() => addToCart(m)}
+                  className="mt-5 w-full py-3 rounded-2xl bg-cyan-500/20 border border-cyan-400/20 hover:bg-cyan-500/30 transition"
+                >
+                  Add To Cart
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+      
 
         {/* FOOTER */}
         <footer className="mt-24 border-t border-white/10 pt-10 pb-6 text-center">
