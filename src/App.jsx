@@ -16,6 +16,7 @@ import AddMedicine from "./pages/admin/AddMedicine";
 import Medicines from "./pages/admin/Medicines";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
+import DeliveryAddress from "./pages/DeliveryAddress";
 
 function App() {
   return (
@@ -95,6 +96,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/delivery-address" element={<ProtectedRoute>
+          <DeliveryAddress />
+        </ProtectedRoute>} />
 
         <Route
           path="/admin/medicines"

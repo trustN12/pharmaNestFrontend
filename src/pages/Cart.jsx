@@ -19,7 +19,8 @@ function Cart() {
       return acc + price * qty;
     }, 0);
 
-    setTotal(Number(sum.toFixed(2)));
+    // setTotal(Number(sum.toFixed(2)));
+    setTotal(parseFloat(sum.toFixed(2)));
   }, [cartItems]);
 
   // ================= FETCH CART =================
@@ -117,25 +118,50 @@ function Cart() {
   };
 
   // ================= PLACE ORDER =================
-  const placeOrder = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
+//   const placeOrder = () => {
+//   const user = JSON.parse(localStorage.getItem("user"));
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5281/api/Medicines/PlaceOrder",
-        {
-          ID: user.id,
-        },
-      );
+//   if (!user) {
+//     alert("Login required");
+//     return;
+//   }
 
-      if (response.data.statusCode === 200) {
-        alert("Order Placed Successfully");
-        fetchCart();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+//   const safeTotal = parseFloat(total);
+
+//   if (!safeTotal || safeTotal <= 0) {
+//     alert("Invalid cart total");
+//     return;
+//   }
+
+//   navigate("/delivery-address", {
+//     state: {
+//       userId: user.id,
+//       totalAmount: safeTotal,
+//       cartItems: cartItems,
+//     },
+//   });
+// };
+
+
+const placeOrder = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const calculatedTotal = cartItems.reduce((acc, item) => {
+    const price = Number(item.discountedPrice || 0);
+    const qty = Number(item.quantity || 0);
+    return acc + price * qty;
+  }, 0);
+
+  const safeTotal = Number(calculatedTotal.toFixed(2));
+
+  navigate("/delivery-address", {
+    state: {
+      userId: user.id,
+      totalAmount: safeTotal,
+      cartItems: cartItems,
+    },
+  });
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#020617] text-white p-6">
