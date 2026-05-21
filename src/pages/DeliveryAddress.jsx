@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 function DeliveryAddress() {
   const { state } = useLocation();
@@ -29,11 +30,19 @@ function DeliveryAddress() {
     try {
       const amountInPaise = Math.round(Number(totalAmount) * 100);
 
+      // const res = await axios.post(
+      //   "http://localhost:5281/api/Payment/CreateOrder",
+      //   {
+      //     userId: userId,
+      //     amount: amountInPaise,
+      //   },
+      // );
+
       const res = await axios.post(
         "http://localhost:5281/api/Payment/CreateOrder",
         {
           userId: userId,
-          amount: amountInPaise,
+          amount: totalAmount,
         },
       );
 
@@ -41,33 +50,73 @@ function DeliveryAddress() {
 
       const options = {
         key: "rzp_test_7FEQanUQWAA66x",
-        amount: order.amount || amountInPaise,
+
+        amount: order.amount,
         currency: "INR",
+
         name: "PharmaNest",
         description: "Medicine Order",
+
         order_id: order.id,
 
         handler: async function (response) {
-          await axios.post(
-            "http://localhost:5281/api/Payment/VerifyPayment",
-            response,
-          );
+          console.log("RAZORPAY RESPONSE:");
+          console.log(response);
 
-          await axios.post("http://localhost:5281/api/Medicines/PlaceOrder", {
-            userId: userId,
-            receiverName: form.receiverName,
-            phone: form.phone,
-            addressLine: form.addressLine,
-            district: form.district,
-            state: form.state,
-            pincode: form.pincode,
+          try {
+            const verifyPayload = {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            };
 
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id,
-          });
+            console.log("VERIFY PAYLOAD:");
+            console.log(verifyPayload);
 
-          alert("Order Successful 🎉");
-          navigate("/success");
+            // VERIFY PAYMENT
+            await axios.post(
+              "http://localhost:5281/api/Payment/VerifyPayment",
+              verifyPayload,
+            );
+
+            // PLACE ORDER
+            await axios.post("http://localhost:5281/api/Medicines/PlaceOrder", {
+              userId: userId,
+              receiverName: form.receiverName,
+              phone: form.phone,
+              addressLine: form.addressLine,
+              district: form.district,
+              state: form.state,
+              pincode: form.pincode,
+
+              razorpayPaymentId: response.razorpay_payment_id,
+
+              razorpayOrderId: response.razorpay_order_id,
+            });
+
+            // CLEAR CART AFTER SUCCESSFUL ORDER
+            await axios.post("http://localhost:5281/api/Payment/ClearCart", {
+              id: userId,
+            });
+
+            toast.success("Order Successful 🎉");
+
+            navigate("/your-order");
+          } catch (err) {
+            console.log("VERIFY ERROR:");
+            console.log(err.response?.data || err);
+
+            toast.error("Payment verification failed");
+          }
+        },
+
+        prefill: {
+          name: form.receiverName,
+          contact: form.phone,
+        },
+
+        theme: {
+          color: "#06b6d4",
         },
       };
 
@@ -75,7 +124,7 @@ function DeliveryAddress() {
       rzp.open();
     } catch (err) {
       console.log(err);
-      alert("Payment failed");
+      toast.error("Payment failed");
     }
   };
 

@@ -14,6 +14,7 @@ import Users from "./pages/admin/Users";
 import Orders from "./pages/admin/Orders";
 import AddMedicine from "./pages/admin/AddMedicine";
 import Medicines from "./pages/admin/Medicines";
+import YourOrder from "./pages/YourOrder";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import DeliveryAddress from "./pages/DeliveryAddress";
@@ -97,15 +98,29 @@ function App() {
           }
         />
 
-        <Route path="/delivery-address" element={<ProtectedRoute>
-          <DeliveryAddress />
-        </ProtectedRoute>} />
+        <Route
+          path="/delivery-address"
+          element={
+            <ProtectedRoute role="Users">
+              <DeliveryAddress />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin/medicines"
           element={
             <ProtectedRoute role="Admin">
               <Medicines />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/your-order"
+          element={
+            <ProtectedRoute role="Users">
+              <YourOrder />
             </ProtectedRoute>
           }
         />

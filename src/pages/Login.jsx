@@ -65,7 +65,7 @@ function Login() {
         }
       );
 
-      console.log("API Response Data:", response.data);
+      // console.log("API Response Data:", response.data);
 
       // =========================================
       // SUCCESS
@@ -89,7 +89,7 @@ function Login() {
           ).trim(),
         };
 
-        console.log("Logged In User Object:", loggedInUser);
+        // console.log("Logged In User Object:", loggedInUser);
 
         // =========================================
         // SAVE USER DATA & STATUS
@@ -113,7 +113,7 @@ function Login() {
         // REDIRECT BASED ON ROLE
         // =========================================
         setTimeout(() => {
-          console.log("FINAL ROLE REDIRECT:", loggedInUser.type);
+          // console.log("FINAL ROLE REDIRECT:", loggedInUser.type);
 
           // ADMIN REDIRECT
           if (loggedInUser.type.toLowerCase() === "admin") {

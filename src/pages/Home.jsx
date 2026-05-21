@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { ShieldCheck, HeartPulse, Truck, Star } from "lucide-react";
 import gsap from "gsap";
+import { Link } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 function Home() {
   const heroRef = useRef(null);
@@ -71,6 +73,24 @@ function Home() {
       },
     );
   }, []);
+
+
+  const handleExploreClick = (e) => {
+    // Prevent navigation since the user needs to log in first
+    // e.preventDefault(); 
+    
+    // Trigger the toast with custom styling to match your dark/neon theme
+    toast('Please log in to explore medicines', {
+      icon: '🔒',
+      style: {
+        borderRadius: '16px',
+        background: '#0f172a', // slate-900
+        color: '#fff',
+        border: '1px solid #22d3ee', // cyan-400
+      },
+    });
+  };
+
 
   return (
     <div className="min-h-screen bg-[#020617] overflow-hidden text-white relative">
@@ -189,16 +209,17 @@ function Home() {
           ref={subtitleRef}
           className="mt-8 text-slate-300 text-lg md:text-2xl max-w-3xl leading-relaxed"
         >
-          Experience lightning-fast medicine delivery, AI-powered healthcare
-          assistance, trusted pharmacies, and futuristic wellness — all in one
+          Experience lightning-fast medicine delivery, trusted pharmacies, and futuristic wellness — all in one
           beautiful platform.
         </p>
 
         {/* Buttons */}
         <div ref={buttonRef} className="flex flex-col sm:flex-row gap-6 mt-12">
-          <button className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-lg font-semibold hover:scale-105 transition duration-300 shadow-2xl shadow-cyan-500/40">
+          <Link to={"/user-dashboard"}>
+              <button onClick={handleExploreClick} className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-lg font-semibold hover:scale-105 transition duration-300 shadow-2xl shadow-cyan-500/40">
             Explore Medicines
           </button>
+          </Link>
 
           <button className="px-8 py-4 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition duration-300">
             Learn More
