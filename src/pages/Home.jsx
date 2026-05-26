@@ -189,7 +189,7 @@ function Home() {
           className="mb-8"
         >
           <div className="px-5 py-2 rounded-full border border-cyan-400/40 bg-white/5 backdrop-blur-xl text-cyan-300 text-sm shadow-lg shadow-cyan-500/20">
-            ✨ India’s Future Of Smart Healthcare
+            ✨ India's Future Of Best Healthcare
           </div>
         </motion.div>
 
@@ -315,8 +315,8 @@ function Home() {
             <h3 className="text-2xl font-bold mb-4">AI Health Assistant</h3>
 
             <p className="text-slate-300 leading-relaxed">
-              Smart healthcare suggestions, reminders, and instant medical
-              support powered by AI.
+              Instant customer support
+              powered by AI.
             </p>
           </motion.div>
 
@@ -402,16 +402,9 @@ function Home() {
               <h2 className="text-xl font-bold mb-6 text-white">Services</h2>
 
               <ul className="space-y-4 text-slate-400">
-                <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                  AI Health Assistant
-                </li>
 
                 <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
                   Fast Delivery
-                </li>
-
-                <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                  Online Prescription
                 </li>
 
                 <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
