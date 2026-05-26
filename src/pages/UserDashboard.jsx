@@ -27,6 +27,7 @@ import {
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PharmaNestAI from "../ConvAI/PharmaNestAI";
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -390,6 +391,9 @@ useEffect(() => {
     <div className="min-h-screen bg-[#020617] text-white overflow-hidden relative">
       {/* Toast */}
       <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+
+       {/* CONV AI */}
+      <PharmaNestAI></PharmaNestAI>
 
       {/* Background Glow */}
       <div className="absolute inset-0 pointer-events-none">

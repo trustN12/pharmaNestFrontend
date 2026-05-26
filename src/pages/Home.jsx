@@ -7,6 +7,7 @@ import { ShieldCheck, HeartPulse, Truck, Star } from "lucide-react";
 import gsap from "gsap";
 import { Link } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import PharmaNestAI from "../ConvAI/PharmaNestAI";
 
 function Home() {
   const heroRef = useRef(null);
@@ -94,7 +95,10 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-[#020617] overflow-hidden text-white relative">
-      {/* ADD THIS BELOW YOUR BACKGROUND GLOW DIVS */}
+      
+
+      {/* CONV AI */}
+      <PharmaNestAI></PharmaNestAI>
 
       {/* Neon Heart Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
