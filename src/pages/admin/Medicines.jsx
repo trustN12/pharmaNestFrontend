@@ -88,6 +88,10 @@ function Medicines() {
 
       await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
 
+//       await axios.delete(
+//   `${API}/api/Medicines/deleteMedicine/${id}`
+// );
+
       setMedicines((prev) => prev.filter((m) => m.id !== id));
     } catch {
       alert("Delete failed");
