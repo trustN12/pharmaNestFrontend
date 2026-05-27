@@ -11,6 +11,9 @@ function DeliveryAddress() {
   const totalAmount = state?.totalAmount;
   const cartItems = state?.cartItems;
 
+
+   const API = import.meta.env.VITE_API_BASE_URL;
+
   // ADDRESS STATE
   const [form, setForm] = useState({
     receiverName: "",
@@ -39,7 +42,7 @@ function DeliveryAddress() {
       // );
 
       const res = await axios.post(
-        "http://localhost:5281/api/Payment/CreateOrder",
+        `${API}/api/Payment/CreateOrder`,
         {
           userId: userId,
           amount: totalAmount,
@@ -48,8 +51,10 @@ function DeliveryAddress() {
 
       const order = res.data;
 
+    
+
       const options = {
-        key: "rzp_test_7FEQanUQWAA66x",
+        key: import.meta.env.VITE_RAZORPAY_KEY,
 
         amount: order.amount,
         currency: "INR",
@@ -60,8 +65,8 @@ function DeliveryAddress() {
         order_id: order.id,
 
         handler: async function (response) {
-          console.log("RAZORPAY RESPONSE:");
-          console.log(response);
+          // console.log("RAZORPAY RESPONSE:");
+          // console.log(response);
 
           try {
             const verifyPayload = {
@@ -70,17 +75,17 @@ function DeliveryAddress() {
               razorpay_signature: response.razorpay_signature,
             };
 
-            console.log("VERIFY PAYLOAD:");
-            console.log(verifyPayload);
+            // console.log("VERIFY PAYLOAD:");
+            // console.log(verifyPayload);
 
             // VERIFY PAYMENT
             await axios.post(
-              "http://localhost:5281/api/Payment/VerifyPayment",
+              `${API}/api/Payment/VerifyPayment`,
               verifyPayload,
             );
 
             // PLACE ORDER
-            await axios.post("http://localhost:5281/api/Medicines/PlaceOrder", {
+            await axios.post(`${API}/api/Medicines/PlaceOrder`, {
               userId: userId,
               receiverName: form.receiverName,
               phone: form.phone,
@@ -95,7 +100,7 @@ function DeliveryAddress() {
             });
 
             // CLEAR CART AFTER SUCCESSFUL ORDER
-            await axios.post("http://localhost:5281/api/Payment/ClearCart", {
+            await axios.post(`${API}/api/Payment/ClearCart`, {
               id: userId,
             });
 
@@ -133,7 +138,7 @@ function DeliveryAddress() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5281/api/Payment/GetPincodeDetails/${pin}`,
+        `${API}/api/Payment/GetPincodeDetails/${pin}`,
       );
 
       const data = JSON.parse(res.data);

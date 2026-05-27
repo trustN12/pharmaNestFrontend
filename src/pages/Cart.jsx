@@ -27,6 +27,8 @@ function Cart() {
 
 
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
 
   // ================= FETCH ORDERS =================
 
@@ -39,14 +41,14 @@ const fetchOrders = async () => {
       Type: user.type || user.Type || "User",
     };
 
-    console.log("PAYLOAD:", payload);
+    // console.log("PAYLOAD:", payload);
 
     const response = await axios.post(
-      "http://localhost:5281/api/Medicines/OrderList",
+      `${API}/api/Medicines/OrderList`,
       payload
     );
 
-    console.log("FULL RESPONSE:", response.data);
+    // console.log("FULL RESPONSE:", response.data);
 
     const code =
       response.data.statusCode || response.data.StatusCode;
@@ -54,7 +56,7 @@ const fetchOrders = async () => {
     const orders =
       response.data.listOrders || response.data.ListOrders;
 
-    console.log("ORDERS:", orders);
+    // console.log("ORDERS:", orders);
 
     if (code === 200) {
       setOrders(orders);
@@ -73,7 +75,7 @@ const fetchOrders = async () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
 
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/GetCart",
+        `${API}/api/Medicines/GetCart`,
         {
           userId: user.id,
         },
@@ -117,7 +119,7 @@ const fetchOrders = async () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/UpdateCartQuantity",
+        `${API}/api/Medicines/UpdateCartQuantity`,
         {
           id: item.id,
           quantity: newQty,
@@ -149,7 +151,7 @@ const fetchOrders = async () => {
   const removeFromCart = async (id) => {
     try {
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/DeleteCartItem",
+        `${API}/api/Medicines/DeleteCartItem`,
         { id },
       );
 

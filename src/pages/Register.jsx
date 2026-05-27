@@ -28,6 +28,10 @@ function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+
   const handleChange = (e) => {
     setUser({
       ...user,
@@ -40,7 +44,7 @@ function Register() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5281/api/Users/registration",
+        `${API}/api/Users/registration`,
         {
           FirstName: user.firstName,
           LastName: user.lastName,
@@ -56,7 +60,7 @@ function Register() {
         navigate("/dashboard");
       }, 2000);
 
-      console.log(response.data);
+      // console.log(response.data);
 
       // Clear Form
       setUser({
@@ -71,7 +75,7 @@ function Register() {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
 
       toast.error("Registration Failed ❌");
     }

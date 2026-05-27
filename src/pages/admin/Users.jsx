@@ -29,6 +29,8 @@ function Users() {
 
   const [toast, setToast] = useState(null);
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   // ============================================
   // FETCH USERS
   // ============================================
@@ -50,7 +52,7 @@ function Users() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:5281/api/Admin/GetUsers",
+        `${API}/api/Admin/GetUsers`,
       );
 
       if (response.data.statusCode === 200) {
@@ -70,7 +72,7 @@ function Users() {
   const approveUser = async (id) => {
     try {
       const response = await axios.put(
-        `http://localhost:5281/api/Admin/ApproveUser/${id}`,
+        `${API}/api/Admin/ApproveUser/${id}`,
       );
 
       // if (response.data.statusCode === 200) {

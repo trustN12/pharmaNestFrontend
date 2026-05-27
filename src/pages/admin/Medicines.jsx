@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { toast } from "react-hot-toast";
 
-const API_BASE_URL = "http://localhost:5281/api/Medicines/MedicineList";
+
 
 function Medicines() {
   const [medicines, setMedicines] = useState([]);
@@ -34,6 +34,9 @@ function Medicines() {
   const [saveLoading, setSaveLoading] = useState(false);
 
   const modalRef = useRef(null);
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+  // const API_BASE_URL = ``;
 
   useEffect(() => {
     fetchMedicines();
@@ -61,7 +64,10 @@ function Medicines() {
   const fetchMedicines = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(API_BASE_URL);
+      // const res = await axios.get(API_BASE_URL);
+      const res = await axios.get(
+  `${API}/api/Medicines/MedicineList`
+);
 
       const data =
         res.data?.listMedicines || res.data?.medicines || res.data || [];
@@ -80,7 +86,7 @@ function Medicines() {
     try {
       setDeleteLoading(id);
 
-      await axios.delete(`${API_BASE_URL}/deleteMedicine/${id}`);
+      await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
 
       setMedicines((prev) => prev.filter((m) => m.id !== id));
     } catch {
@@ -129,7 +135,7 @@ function Medicines() {
 
       // UPDATE DATABASE
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/AddUpdateMedicine",
+        `${API}/api/Medicines/AddUpdateMedicine`,
         payload,
       );
 
@@ -170,20 +176,18 @@ function Medicines() {
     );
   }, [medicines, search]);
 
-
-
   // LOCK BODY SCROLL WHEN MODAL OPEN
-useEffect(() => {
-  if (selectedMedicine) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "auto";
-  }
+  useEffect(() => {
+    if (selectedMedicine) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
 
-  return () => {
-    document.body.style.overflow = "auto";
-  };
-}, [selectedMedicine]);
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedMedicine]);
 
   return (
     <div className="flex min-h-screen bg-[#020617] text-white overflow-hidden">

@@ -25,6 +25,8 @@ function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -58,7 +60,7 @@ function Login() {
       setLoading(true);
 
       const response = await axios.post(
-        "http://localhost:5281/api/Users/login",
+        `${API}/api/Users/login`,
         {
           Email: user.email,
           Password: user.password,

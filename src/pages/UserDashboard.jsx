@@ -52,6 +52,12 @@ function UserDashboard() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+
+
   const ITEMS_PER_PAGE = 6;
 
   /* FILTERED MEDICINES */
@@ -96,7 +102,7 @@ function UserDashboard() {
   const fetchUser = async (id) => {
     try {
       const response = await axios.post(
-        "http://localhost:5281/api/Users/ViewUser",
+        `${API}/api/Users/ViewUser`,
         {
           ID: id,
         },
@@ -132,7 +138,7 @@ function UserDashboard() {
       if (!user?.id) return;
 
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/GetCart",
+        `${API}/api/Medicines/GetCart`,
         { userId: user.id },
       );
 
@@ -151,7 +157,7 @@ function UserDashboard() {
   const fetchMedicines = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5281/api/Medicines/MedicineList",
+        `${API}/api/Medicines/MedicineList`,
       );
 
       if (res.data.statusCode === 200) {
@@ -179,7 +185,7 @@ function UserDashboard() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/UpdateCartQuantity",
+        `${API}/api/Medicines/UpdateCartQuantity`,
         {
           id: item.id,
           quantity: newQty,
@@ -208,7 +214,7 @@ function UserDashboard() {
   const removeFromCart = async (id) => {
     try {
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/DeleteCartItem",
+        `${API}/api/Medicines/DeleteCartItem`,
         { id },
       );
 
@@ -226,7 +232,7 @@ function UserDashboard() {
       const user = JSON.parse(localStorage.getItem("user"));
 
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/PlaceOrder",
+        `${API}/api/Medicines/PlaceOrder`,
         {
           userId: user.id,
         },
@@ -257,7 +263,7 @@ function UserDashboard() {
   const updateProfile = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5281/api/Users/UpdateProfile",
+        `${API}/api/Users/UpdateProfile`,
         {
           ID: editData.id,
           FirstName: editData.firstName,
@@ -308,7 +314,7 @@ function UserDashboard() {
       };
 
       const res = await axios.post(
-        "http://localhost:5281/api/Medicines/AddToCart",
+        `${API}/api/Medicines/AddToCart`,
         payload,
       );
 

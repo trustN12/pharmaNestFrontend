@@ -12,22 +12,25 @@ function YourOrder() {
     fetchOrders();
   }, []);
 
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   // ================= FETCH ORDERS =================
   const fetchOrders = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
 
 const res = await axios.post(
-  "http://localhost:5281/api/Medicines/OrderList",
+  `${API}/api/Medicines/OrderList`,
   {
     ID: user.id,
     Type: user.type,
   }
 );
 
-console.log(res.data);
+// console.log(res.data);
 
-      console.log("ORDER RESPONSE:", res.data);
+      // console.log("ORDER RESPONSE:", res.data);
 
       if (res.data.statusCode === 200) {
         setOrders(res.data.listOrders || []);

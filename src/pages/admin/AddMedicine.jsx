@@ -56,6 +56,14 @@ function AddMedicine() {
     });
   };
 
+
+
+
+   const API = import.meta.env.VITE_API_BASE_URL;
+
+
+
+
   // ============================================
   // ADD MEDICINE
   // ============================================
@@ -91,14 +99,14 @@ function AddMedicine() {
       console.log(payload);
 
       const response = await axios.post(
-        "http://localhost:5281/api/Medicines/AddUpdateMedicine",
+        `${API}/api/Medicines/AddUpdateMedicine`,
         payload,
       );
 
-      console.log(response.data);
+      // console.log(response.data);
 
       if (response.data.statusCode === 200) {
-        toast("Medicine Added Successfully");
+        toast.success("Medicine Added Successfully");
 
         setMedicine({
           id: 0,
@@ -129,7 +137,7 @@ function AddMedicine() {
 
       console.log(error.response?.data);
 
-      toast("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }

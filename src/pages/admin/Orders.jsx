@@ -7,6 +7,9 @@ function Orders() {
 
   const [orders, setOrders] = useState([]);
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -25,7 +28,7 @@ function Orders() {
       };
 
       const response = await axios.post(
-        "http://localhost:5281/api/Medicines/OrderList",
+        `${API}/api/Medicines/OrderList`,
         payload
       );
 

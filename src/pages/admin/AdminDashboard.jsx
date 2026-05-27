@@ -40,6 +40,11 @@ function AdminDashboard() {
 
   const [admin, setAdmin] = useState(null);
 
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+
+
   // ============================================
   // FETCH DATA
   // ============================================
@@ -62,7 +67,7 @@ function AdminDashboard() {
   try {
 
     const response = await axios.get(
-      "http://localhost:5281/api/Admin/GetAdminProfile"
+      `${API}/api/Admin/GetAdminProfile`
     );
 
     if (response.data.statusCode === 200) {
@@ -98,7 +103,7 @@ function AdminDashboard() {
     try {
 
       const response = await axios.get(
-        "http://localhost:5281/api/Admin/GetUsers"
+        `${API}/api/Admin/GetUsers`
       );
 
       if (response.data.statusCode === 200) {
@@ -123,7 +128,7 @@ function AdminDashboard() {
     try {
 
       const response = await axios.get(
-        "http://localhost:5281/api/Admin/GetOrders"
+        `${API}/api/Admin/GetOrders`
       );
 
       if (response.data.statusCode === 200) {
@@ -148,10 +153,10 @@ const fetchMedicines = async () => {
   try {
 
     const response = await axios.get(
-      "http://localhost:5281/api/Medicines/MedicineList"
+      `${API}/api/Medicines/MedicineList`
     );
 
-    console.log("MEDICINES API:", response.data);
+    // console.log("MEDICINES API:", response.data);
 
     const data =
       response.data?.listMedicines ||

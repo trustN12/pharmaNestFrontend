@@ -1,10 +1,13 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 function MedicineList() {
 
     const [medicines, setMedicines] = useState([]);
+
+    const API = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         fetchMedicines();
@@ -15,7 +18,7 @@ function MedicineList() {
         try {
 
             const response = await axios.get(
-                "http://localhost:5281/api/Medicines/MedicineList"
+                `${API}/api/Medicines/MedicineList`
             );
 
             if (response.data.statusCode === 200) {
@@ -34,7 +37,7 @@ function MedicineList() {
         try {
 
             const response = await axios.post(
-                "http://localhost:5281/api/Medicines/AddToCart",
+               `${API}/api/Medicines/AddToCart`,
                 {
                     UserId: user.id,
                     MedicineID: item.id,
@@ -46,7 +49,7 @@ function MedicineList() {
             );
 
             if (response.data.statusCode === 200) {
-                alert("Medicine Added To Cart");
+                toast.success("Medicine Added To Cart");
             }
 
         } catch (error) {
