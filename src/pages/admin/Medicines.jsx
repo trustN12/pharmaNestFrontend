@@ -31,6 +31,9 @@ function Medicines() {
   const [editData, setEditData] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
 
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
+
   const modalRef = useRef(null);
 
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -76,25 +79,54 @@ function Medicines() {
     }
   };
 
-  const deleteMedicine = async (id) => {
-    if (!window.confirm("Delete this medicine?")) return;
+  // const deleteMedicine = async (id) => {
+  //   if (!window.confirm("Delete this medicine?")) return;
 
-    try {
-      setDeleteLoading(id);
+  //   try {
+  //     setDeleteLoading(id);
 
-      // await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
+  //     // await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
 
-      await axios.delete(`${API}/api/Medicines/deleteMedicine/${id}`);
+  //     await axios.delete(`${API}/api/Medicines/deleteMedicine/${id}`);
 
-      setMedicines((prev) => prev.filter((m) => m.id !== id));
-    } catch {
-      alert("Delete failed");
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
+  //     setMedicines((prev) => prev.filter((m) => m.id !== id));
+  //   } catch {
+  //     alert("Delete failed");
+  //   } finally {
+  //     setDeleteLoading(null);
+  //   }
+  // };
 
   // ================= EDIT INPUT CHANGE =================
+ 
+
+  const deleteMedicine = (id) => {
+  setDeleteTarget(id);
+};
+
+const confirmDelete = async () => {
+  try {
+    setConfirmDeleteLoading(true);
+
+    await axios.delete(
+      `${API}/api/Medicines/DeleteMedicine/${deleteTarget}`
+    );
+
+    setMedicines((prev) => prev.filter((m) => m.id !== deleteTarget));
+
+    toast.success("Medicine deleted");
+    setDeleteTarget(null);
+  } catch (err) {
+    toast.error("Delete failed");
+  } finally {
+    setConfirmDeleteLoading(false);
+  }
+};
+ 
+ 
+ 
+ 
+ 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
 
@@ -304,8 +336,19 @@ function Medicines() {
                         <Eye size={18} />
                       </button>
 
-                      <button
+                      {/* <button
                         onClick={() => deleteMedicine(m.id)}
+                        className="flex-1 bg-red-500/20 py-3 rounded-2xl flex justify-center"
+                      >
+                        {deleteLoading === m.id ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <Trash2 />
+                        )}
+                      </button> */}
+
+                        <button
+                        onClick={() => setDeleteTarget(m.id)}
                         className="flex-1 bg-red-500/20 py-3 rounded-2xl flex justify-center"
                       >
                         {deleteLoading === m.id ? (
@@ -318,6 +361,48 @@ function Medicines() {
                   </div>
                 </motion.div>
               ))}
+
+
+              {deleteTarget && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center">
+    
+    {/* BACKDROP */}
+    <div
+      className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      onClick={() => setDeleteTarget(null)}
+    />
+
+    {/* MODAL */}
+    <div className="relative bg-[#0f172a] border border-white/10 rounded-2xl p-6 w-[90%] max-w-md shadow-2xl">
+      
+      <h2 className="text-xl font-bold text-white">
+        Delete Medicine?
+      </h2>
+
+      <p className="text-slate-400 mt-2">
+        This action cannot be undone.
+      </p>
+
+      <div className="flex gap-3 mt-6">
+        
+        <button
+          onClick={() => setDeleteTarget(null)}
+          className="flex-1 py-2 rounded-xl bg-white/5 border border-white/10"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={confirmDelete}
+          disabled={confirmDeleteLoading}
+          className="flex-1 py-2 rounded-xl bg-red-500 text-white font-bold"
+        >
+          {confirmDeleteLoading ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
             </div>
           )}
 
