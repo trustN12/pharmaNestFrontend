@@ -18,8 +18,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { toast } from "react-hot-toast";
 
-
-
 function Medicines() {
   const [medicines, setMedicines] = useState([]);
   const [search, setSearch] = useState("");
@@ -65,9 +63,7 @@ function Medicines() {
     try {
       setLoading(true);
       // const res = await axios.get(API_BASE_URL);
-      const res = await axios.get(
-  `${API}/api/Medicines/MedicineList`
-);
+      const res = await axios.get(`${API}/api/Medicines/MedicineList`);
 
       const data =
         res.data?.listMedicines || res.data?.medicines || res.data || [];
@@ -86,11 +82,9 @@ function Medicines() {
     try {
       setDeleteLoading(id);
 
-      await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
+      // await axios.delete(`${API}/api/Medicines/MedicineList/deleteMedicine/${id}`);
 
-//       await axios.delete(
-//   `${API}/api/Medicines/deleteMedicine/${id}`
-// );
+      await axios.delete(`${API}/api/Medicines/deleteMedicine/${id}`);
 
       setMedicines((prev) => prev.filter((m) => m.id !== id));
     } catch {
