@@ -109,9 +109,9 @@ function AddMedicine() {
 
     console.log("ADD MEDICINE RESPONSE:", response.data);
 
-    if (response.data.StatusCode === 200) {
+    if (response.data.statusCode === 200) {
 
-      toast.success(response.data.StatusMessage);
+      toast.success(response.data.statusMessage);
 
       setMedicine({
 
@@ -139,7 +139,7 @@ function AddMedicine() {
 
     } else {
 
-      toast.error(response.data.StatusMessage);
+      toast.error(response.data.statusMessage);;
 
     }
 

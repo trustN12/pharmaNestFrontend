@@ -70,7 +70,7 @@ function AdminDashboard() {
       `${API}/api/Admin/GetAdminProfile`
     );
 
-    if (response.data.StatusCode === 200) {
+    if (response.data.statusCode === 200) {
 
       setAdmin({
 
@@ -106,7 +106,7 @@ function AdminDashboard() {
         `${API}/api/Admin/GetUsers`
       );
 
-      if (response.data.StatusCode === 200) {
+      if (response.data.statusCode === 200) {
 
         setUsers(response.data.listUsers);
 
@@ -131,7 +131,7 @@ function AdminDashboard() {
         `${API}/api/Admin/GetOrders`
       );
 
-      if (response.data.StatusCode === 200) {
+      if (response.data.statusCode === 200) {
 
         setOrders(response.data.listOrders);
 
