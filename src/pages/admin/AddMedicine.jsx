@@ -98,40 +98,40 @@ function AddMedicine() {
 
       console.log(payload);
 
-      const response = await axios.post(
-        `${API}/api/Medicines/AddUpdateMedicine`,
-        payload,
-      );
+      const response = const response = await axios.post(
+  `${API}/api/Medicines/AddUpdateMedicine`,
+  payload,
+);
 
-      // console.log(response.data);
+console.log(response.data);
 
-      if (response.data.statusCode === 200) {
-        toast.success("Medicine Added Successfully");
+if (response.data.StatusCode === 200) {
+  toast.success(response.data.StatusMessage);
 
-        setMedicine({
-          id: 0,
+  setMedicine({
+    id: 0,
 
-          medicineName: "",
+    medicineName: "",
 
-          manufacturer: "",
+    manufacturer: "",
 
-          category: "",
+    category: "",
 
-          unitPrice: "",
+    unitPrice: "",
 
-          discountedPrice: "",
+    discountedPrice: "",
 
-          stock: "",
+    stock: "",
 
-          expiryDate: "",
+    expiryDate: "",
 
-          description: "",
+    description: "",
 
-          imageUrl: "",
-        });
-      } else {
-        alert(response.data.statusMessage);
-      }
+    imageUrl: "",
+  });
+} else {
+  toast.error(response.data.StatusMessage);
+}
     } catch (error) {
       console.log(error);
 
