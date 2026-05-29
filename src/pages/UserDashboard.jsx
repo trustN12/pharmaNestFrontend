@@ -900,7 +900,7 @@ useEffect(() => {
               <h2 className="text-4xl font-black mb-4">No Medicines Found</h2>
 
               <p className="text-slate-400 text-lg max-w-xl mx-auto leading-8">
-                We couldn't find any futuristic healthcare products matching
+                We couldn't find any healthcare products matching
                 your search.
               </p>
             </motion.div>
@@ -1222,7 +1222,7 @@ useEffect(() => {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#07111f] via-[#07111f]/50 to-transparent"></div>
 
                   {/* CLOSE BUTTON */}
-                  <button
+                  {/* <button
                     onClick={() => setSelectedMedicine(null)}
                     className="
               absolute top-4 right-4
@@ -1236,8 +1236,33 @@ useEffect(() => {
               transition
             "
                   >
-                    ×
-                  </button>
+                    x
+                  </button> */}
+
+
+                  {/* CLOSE BUTTON */}
+<button
+  onClick={(e) => {
+    e.stopPropagation();
+    setSelectedMedicine(null);
+  }}
+  className="
+    absolute top-4 right-4
+    z-[999999]
+    pointer-events-auto
+    w-12 h-12
+    rounded-2xl
+    bg-black/40
+    border border-white/10
+    backdrop-blur-xl
+    text-white text-2xl
+    hover:bg-red-500/20
+    transition
+    flex items-center justify-center
+  "
+>
+  x
+</button>
 
                   {/* TITLE */}
                   <div className="absolute bottom-6 left-6 right-6">
