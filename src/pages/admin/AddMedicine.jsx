@@ -69,79 +69,96 @@ function AddMedicine() {
   // ============================================
 
   const addMedicine = async (e) => {
-    e.preventDefault();
 
-    try {
-      setLoading(true);
+  e.preventDefault();
 
-      const payload = {
-        id: medicine.id,
+  try {
 
-        medicineName: medicine.medicineName,
+    setLoading(true);
 
-        manufacturer: medicine.manufacturer,
+    const payload = {
 
-        category: medicine.category,
+      id: medicine.id,
 
-        unitPrice: parseFloat(medicine.unitPrice),
+      medicineName: medicine.medicineName,
 
-        discountedPrice: parseFloat(medicine.discountedPrice),
+      manufacturer: medicine.manufacturer,
 
-        stock: parseInt(medicine.stock),
+      category: medicine.category,
 
-        expiryDate: medicine.expiryDate,
+      unitPrice: parseFloat(medicine.unitPrice),
 
-        description: medicine.description,
+      discountedPrice: parseFloat(medicine.discountedPrice),
 
-        imageUrl: medicine.imageUrl,
-      };
+      stock: parseInt(medicine.stock),
 
-      console.log(payload);
+      expiryDate: medicine.expiryDate,
 
-      const response = const response = await axios.post(
-  `${API}/api/Medicines/AddUpdateMedicine`,
-  payload,
-);
+      description: medicine.description,
 
-console.log(response.data);
+      imageUrl: medicine.imageUrl,
 
-if (response.data.StatusCode === 200) {
-  toast.success(response.data.StatusMessage);
+    };
 
-  setMedicine({
-    id: 0,
+    console.log(payload);
 
-    medicineName: "",
+    const response = await axios.post(
+      `${API}/api/Medicines/AddUpdateMedicine`,
+      payload
+    );
 
-    manufacturer: "",
+    console.log("ADD MEDICINE RESPONSE:", response.data);
 
-    category: "",
+    if (response.data.StatusCode === 200) {
 
-    unitPrice: "",
+      toast.success(response.data.StatusMessage);
 
-    discountedPrice: "",
+      setMedicine({
 
-    stock: "",
+        id: 0,
 
-    expiryDate: "",
+        medicineName: "",
 
-    description: "",
+        manufacturer: "",
 
-    imageUrl: "",
-  });
-} else {
-  toast.error(response.data.StatusMessage);
-}
-    } catch (error) {
-      console.log(error);
+        category: "",
 
-      console.log(error.response?.data);
+        unitPrice: "",
 
-      toast.error("Something went wrong");
-    } finally {
-      setLoading(false);
+        discountedPrice: "",
+
+        stock: "",
+
+        expiryDate: "",
+
+        description: "",
+
+        imageUrl: "",
+
+      });
+
+    } else {
+
+      toast.error(response.data.StatusMessage);
+
     }
-  };
+
+  } catch (error) {
+
+    console.log(error);
+
+    console.log(error.response?.data);
+
+    toast.error("Something went wrong");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+
+
 
   return (
     <div className="flex bg-[#020617] min-h-screen text-white overflow-hidden">
