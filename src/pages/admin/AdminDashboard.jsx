@@ -131,6 +131,8 @@ function AdminDashboard() {
         `${API}/api/Admin/GetOrders`
       );
 
+      console.log("ORDERS API:", response.data);
+
       if (response.data.statusCode === 200) {
 
         setOrders(response.data.listOrders);
