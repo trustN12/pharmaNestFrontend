@@ -57,9 +57,11 @@ function Navbar() {
             <span className="absolute -bottom-2 left-0 h-[2px] w-0 bg-cyan-300 transition-all duration-300 group-hover:w-full"></span>
           </Link>
 
-          <button
-            onClick={() => window.open("https://www.mediecho.in/", "_blank")}
-            className="
+          <a
+  href="https://www.mediecho.in/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="
     group relative overflow-hidden
     bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600
     px-7 py-3.5 rounded-2xl
@@ -70,7 +72,7 @@ function Navbar() {
     transition-all duration-500
     hover:scale-105
   "
-          >
+>
             {/* Shine Effect */}
             <span
               className="
@@ -112,7 +114,7 @@ function Navbar() {
                 <span className="font-bold text-white ml-1">MediEcho AI</span>
               </span>
             </div>
-          </button>
+          </a>
         </div>
 
         {/* Mobile Menu Button */}
